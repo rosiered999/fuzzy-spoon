@@ -1,38 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Cropping tool</title>
-</head>
+<title>Image Tuner</title>
+<meta charset="UTF-8"></meta>
 <script>
-function tuner()
-{
-  var upload = document.getElementById('upload');
-  var canvas = getElementById('canv');
-  var ctx = canvas.getContext("2d");
+document.addEventListener('DOMContentLoaded',function(){
+    inp = document.getElementById('imgfile');
+    //console.log(inp);
+    inp.addEventListener("change", imageLoad);
+    },false);
 
-  function display(){
-    var reader = new FileReader();
-    reader.onload = function(e)
-    {
-      var img = new Image();
-      img.onload = function()
-      {
-        ctx.drawImage(img,0,0,img.width,img.height);
-      }
-      img.src = e.target.result;
+function imageLoad(){
+        var inp, file, reader, img;
+        inp = document.getElementById('imgfile');
+        file = inp.files[0];
+        reader = new FileReader();
+        reader.onload = createImage;
+        reader.readAsDataURL(file);
+
+        function createImage() {
+            img = new Image();
+            img.onload = imageLoaded;
+            img.src = reader.result;
+        }
+
+        function imageLoaded() {
+            var canvas = document.getElementById("canvas")
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var imgX = 0;
+            var imgY = 0;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img,imgX,imgY);
+            generateOverlay(ctx,imgX,imgY,img.height, img.width);
+        }
+
+        function generateOverlay(ctx,startX,startY,height,width)
+        {
+            ctx.save();
+            ctx.setLineDash([15,15]);
+            ctx.beginPath();
+            ctx.lineWidth=5;
+            ctx.strokeStyle = 'blue';
+            ctx.moveTo(startX,startY);
+            ctx.lineTo(startX,startY);
+            ctx.lineTo(startX, height);
+            ctx.lineTo(width,height);
+            ctx.lineTo(width,startY);
+            ctx.lineTo(startX,startY);
+            ctx.stroke();
+
+            ctx.restore();
+            ctx.beginPath();
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(startX,startY+height/2,10,10); //mid left
+            ctx.fillRect(startX+width/2,startY,10,10); //topmid
+            ctx.fillRect(startX+width/2,height-10,10,10);//botmid
+            ctx.fillRect(width-10,startY+height/2,10,10);//midright
+
+            ctx.fillRect(startX,startY,10,10); //topleft
+            ctx.fillRect(startX, height-10,10,10); //botleft
+            ctx.fillRect(width-10,height-10,10,10); //botright
+            ctx.fillRect(width-10,startY,10,10); //topright
+            ctx.stroke();
+
+            var stateValues = {
+              ptTopLeft: [startX,startY],
+              ptTopMid: [startX+width/2,startY],
+              ptTopRight: [width-10,startY],
+              ptMidLeft: [startX,startY+height/2],
+              ptMidRight: [width-10,startY+height/2],
+              ptBotLeft: [startX, height-10],
+              ptBotRight: [width-10,height-10],
+              ptBotMid: [startX+width/2,height-10]
+            };
+            //console.log(stateValues);
+            var btn = document.createElement("button");
+            var txt = document.createTextNode("done");
+            btn.appendChild(txt);
+            document.body.appendChild(btn);
+            document.getElementsByTagName("button")[0].addEventListener('click', simulateClick);
+        }
+
+
+        
+
     }
-    reader.readAsDataURL(this.files[0]);
-  }
-}
-
 </script>
+</head>
 <body>
-<p>This is a cropping tool.</p>
-<p>
-<form><input id="upload" onchange="tuner()" type="file"></form>
-</p>
-<img class="image">
-<canvas id="canv" width="800" height="900"> </canvas>
+  <input type='file' id='imgfile' autofocus/>
+    <br></br>
+    <canvas id="canvas"></canvas> <!--style="border:1px solid black;"-->
 </body>
-
 </html>
