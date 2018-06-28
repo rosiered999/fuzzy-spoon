@@ -4,11 +4,37 @@
 <title>Image Tuner</title>
 <meta charset="UTF-8"></meta>
 <script>
+var stop = false;
+var stateValues;
+var imageDrawn = false;
+var button = false;
 document.addEventListener('DOMContentLoaded',function(){
     inp = document.getElementById('imgfile');
     //console.log(inp);
     inp.addEventListener("change", imageLoad);
     },false);
+
+  window.addEventListener("click", handleMouseEvent);
+  window.addEventListener("mousemove", handleMouseEvent);
+
+function handleMouseEvent(event)
+{
+  if(stop==false && imageDrawn==true) //add if image has been drawn
+  {
+      //console.log(event.type);
+      //console.log(event.clientX,event.clientY);
+      editImage(event,stateValues);
+  }
+}
+
+function editImage(event, stateValues)
+{
+    var canvas = document.getElementById("canvas");
+    if(event.type=="click")
+    {
+
+    }
+}
 
 function imageLoad(){
         var inp, file, reader, img;
@@ -64,33 +90,41 @@ function imageLoad(){
             ctx.fillRect(width-10,startY,10,10); //topright
             ctx.stroke();
 
-            var stateValues = {
-              ptTopLeft: [startX,startY],
-              ptTopMid: [startX+width/2,startY],
-              ptTopRight: [width-10,startY],
-              ptMidLeft: [startX,startY+height/2],
-              ptMidRight: [width-10,startY+height/2],
-              ptBotLeft: [startX, height-10],
-              ptBotRight: [width-10,height-10],
-              ptBotMid: [startX+width/2,height-10]
+            stateValues = {
+              ptTopLeft: [startX,startY,false], //X and Y positions and isClicked
+              ptTopMid: [startX+width/2,startY,false],
+              ptTopRight: [width-10,startY,false],
+              ptMidLeft: [startX,startY+height/2,false],
+              ptMidRight: [width-10,startY+height/2,false],
+              ptBotLeft: [startX, height-10,false],
+              ptBotRight: [width-10,height-10,false],
+              ptBotMid: [startX+width/2,height-10,false]
             };
             //console.log(stateValues);
-            var btn = document.createElement("button");
-            var txt = document.createTextNode("done");
-            btn.appendChild(txt);
-            document.body.appendChild(btn);
-            document.getElementsByTagName("button")[0].addEventListener('click', simulateClick);
+            addButton(button);
+
+            function addButton()
+            {
+                if(button==false)
+                {
+                    var btn = document.createElement("button");
+                    var txt = document.createTextNode("done");
+                    btn.appendChild(txt);
+                    document.getElementsByTagName("p")[0].appendChild(btn);
+                    document.getElementsByTagName("button")[0].addEventListener('click', ()=>{alert("button"); stop=true});
+                    button = true;
+                }
+            }
+            imageDrawn = true;
         }
-
-
-        
-
     }
 </script>
 </head>
 <body>
   <input type='file' id='imgfile' autofocus/>
     <br></br>
-    <canvas id="canvas"></canvas> <!--style="border:1px solid black;"-->
-</body>
+    <canvas id="canvas"></canvas>
+    <br></br>
+    <p> </p>
+  </body>
 </html>
