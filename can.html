@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Canvas in JS</title>
+<script>
+window.onload = function(){
+  var canvas = document.getElementById('square');
+  var context = canvas.getContext("2d");
+  context.fillStyle = "#00f";
+  context.fillRect(0,0,1000,1000);
+}
+</script>
+</head>
+<body>
+This is a red square.
+<canvas id="square" width=1000 height=1000></canvas>
+</body>
+</html>
