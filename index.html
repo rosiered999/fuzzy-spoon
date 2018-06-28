@@ -4,54 +4,38 @@
 <title>Cropping tool</title>
 </head>
 <script>
-function preview()
+function tuner()
 {
-  var img = document.getElementsByTagName('img')[0]
-  var file = document.querySelector('input[type="file"]').files[0];
-  var reader = new FileReader();
+  var upload = document.getElementById('upload');
+  upload.addEventListener('change',display);
+  var canvas = getElementById('canv');
+  var ctx = canvas.getContext("2d");
 
-  reader.addEventListener("load",
-    function()
+  function display(e){
+    var reader = new FileReader();
+    reader.onload = function(event)
     {
-      image = new Image();
-      image.addEventListener("load", function()
-    {
-      h = image.height;
-      w = image.width;
-      img.style.height = h;
-      img.style.width = w;
-      //alert(img.childNodes.length);
-      if(img.childNodes.length>=1)//for not allowing multiple images to get uploaded
+      var img = new Image();
+      img.onload = function()
       {
-        img.removeChild(img.childNodes[0]);
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img,0,0);
       }
-
-      //prev.appendChild(this);
-    });
-      image.src = reader.result;
-    });
-
-  if(file)
-  {
-    reader.readAsDataURL(file);
+      img.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
   }
-  drawImage()
 }
-function drawImage()
-{
-  var canv = document.querySelector('img');
-  var canvas = document.createElement('canvas')
-  var ctx = canvas.getContext("2d")
-}
+
 </script>
 <body>
 <p>This is a cropping tool.</p>
 <p>
-<form><input onchange="preview()" type="file"></form>
+<form><input id="upload" onchange="tuner()" type="file"></form>
 </p>
-<a href="#">
 <img class="image">
-</a>
+<canvas id="canv"> </canvas>
 </body>
 
 </html>
