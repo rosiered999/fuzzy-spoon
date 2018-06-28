@@ -12,10 +12,22 @@ document.addEventListener('DOMContentLoaded',function(){
     inp = document.getElementById('imgfile');
     //console.log(inp);
     inp.addEventListener("change", imageLoad);
+
+    var canvasFG = document.getElementById("canvas-fg");
+    var ctx = canvasFG.getContext("2d");
+    ctx.save();
+    ctx.globalAlpha = 0.5
+    ctx.fillRect(0,0,500,500)
+    ctx.clearRect(25,25,100,50);
+    ctx.stroke();
+    ctx.restore();
+
     },false);
 
   window.addEventListener("click", handleMouseEvent);
   window.addEventListener("mousemove", handleMouseEvent);
+
+
 
 function handleMouseEvent(event)
 {
@@ -29,10 +41,30 @@ function handleMouseEvent(event)
 
 function editImage(event, stateValues)
 {
-    var canvas = document.getElementById("canvas");
+    var canvas = document.getElementById("canvas-bg");
+    //console.log(stateValues);
     if(event.type=="click")
     {
+    var clickPos = isInImage(event.clientX,event.clientY,stateValues);
+    console.log("clickPos",clickPos);
+    if(clickPos)
+    {
+        //click on image canvas then move the canvas according to click
+        var mx = event.clientX;
+        var my = event.clientY;
+        canvas.style.left = mx + 'px';
+        canvas.style.top = mx + 'px';
+    }
+    }
+}
 
+function isInImage(X,Y,stateValues)
+{
+    console.log(X,Y);
+    console.log(stateValues.ptTopLeft[0],stateValues.ptTopLeft[1],stateValues.ptBotRight[0],stateValues.ptBotRight[1]);
+    if(stateValues.ptTopLeft[0]+10<X && X<stateValues.ptBotRight[0]-10 && stateValues.ptTopLeft[1]+10<Y && Y<stateValues.ptBotRight[1]+10)
+    {
+        return true;
     }
 }
 
@@ -51,7 +83,7 @@ function imageLoad(){
         }
 
         function imageLoaded() {
-            var canvas = document.getElementById("canvas")
+            var canvas = document.getElementById("canvas-bg")
             canvas.width = img.width;
             canvas.height = img.height;
             var imgX = 0;
@@ -123,7 +155,9 @@ function imageLoad(){
 <body>
   <input type='file' id='imgfile' autofocus/>
     <br></br>
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas-fg" style="position:absolute; z-index:1; width:100%; height:100%;">
+    </canvas>
+    <canvas id="canvas-bg" style="position:absolute; z-index:0;"></canvas>
     <br></br>
     <p> </p>
   </body>
