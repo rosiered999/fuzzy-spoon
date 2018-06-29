@@ -39,21 +39,19 @@ function editImage(event)
     var offset = [0,0];
     var div;
     var isDown = false;
-    var resize;
+    var onBorder = false;
     var canvas = document.getElementById("canvas-bg");
     document.body.addEventListener('mousedown',mouseDown);
-    document.addEventListener('mouseup', function() {resize=0;});
     function mouseDown(e){
         if(isInImage(e.clientX,e.clientY))
         {
-            resize = isInResizers(e.clientX,e.clientY);
-            console.log("resize",resize);
             isDown = true;
             offset = [canvas.offsetLeft - e.clientX,canvas.offsetTop - e.clientY];
             document.addEventListener('mouseup', function() {isDown = false;}, true);
             document.addEventListener('mousemove', function(event) {
                 event.preventDefault();
-                if (isDown && !resize) {
+                var onBorder = isOnBorder(e.clientX,e.clientY);
+                if (isDown && !isOnBorder) {
                     mousePosition = {
 
                         x : event.clientX,
@@ -62,6 +60,10 @@ function editImage(event)
                     };
                     canvas.style.left = (mousePosition.x + offset[0]) + 'px';
                     canvas.style.top  = (mousePosition.y + offset[1]) + 'px';
+                }
+                else if(isDown && isOnBorder)
+                {
+                    console.log("BORDER");
                 }
             }, true);
         }
@@ -72,53 +74,24 @@ function isInImage(X,Y)
 {
     var canvas = document.getElementById("canvas-bg");
     var rect = canvas.getBoundingClientRect();
-    if(X>rect.left && Y>rect.top && Y<rect.bottom && X<rect.right)
+    var bord = getComputedStyle(canvas,null).getPropertyValue('border-left-width');//without jquery.
+    //console.log(X,Y);
+    //console.log(bord);
+    if(X>rect.left+bord && Y>rect.top+bord && Y<rect.bottom-bord && X<rect.right-bord)
     {
+        console.log("within");
         return true;
     }
 }
 
-function isInResizers(X,Y)
+function isOnBorder(X,Y)
 {
     var canvas = document.getElementById("canvas-bg");
     var rect = canvas.getBoundingClientRect();
-    var blurArea =20;
-    var resize;
-    if(X>rect.left && Y>rect.top && Y<(rect.top+blurArea) && X<(rect.left+blurArea))
+    if(X>rect.left && Y>rect.top && Y<rect.bottom && X<rect.right && X<rect.left-7 && Y<rect.top-7 && Y>rect.bottom-7 && X<rect.right-7)
     {
-        return 1; //top left
+        return true;
     }
-    else if(X>rect.left+rect.width/2-blurArea/2 && Y>rect.top && Y<(rect.top+blurArea) && X<(rect.left+rect.width/2+blurArea/2))
-    {
-        return 2;//top mid
-    }
-    else if(X>rect.right-blurArea && Y>rect.top && Y<(rect.top+blurArea) && X<(rect.right))
-    {
-        return 3;//top right
-    }
-    else if(X>rect.left && Y>rect.top+rect.height/2-blurArea/2 && Y<(rect.top+rect.height/2+blurArea/2) && X<(rect.left+blurArea))
-    {
-        return 4;//mid left
-    }
-    else if(X>rect.right-blurArea && Y>rect.top+rect.height/2-blurArea/2 && Y<(rect.top+rect.height/2+blurArea/2) && X<(rect.right))
-    {
-        return 5;//mid right
-    }
-    else if(X>rect.left && Y>rect.bottom-blurArea && Y<(rect.bottom) && X<(rect.left+blurArea))
-    {
-        return 6;//bot left
-    }
-    else if(X>rect.left+rect.width/2-blurArea/2 && Y>rect.bottom-blurArea && Y<(rect.bottom) && X<(rect.left+rect.width/2+blurArea/2))
-    {
-        return 7;//bot mid
-    }
-    else if(X>rect.right-blurArea && Y>rect.bottom-blurArea && Y<(rect.bottom) && X<(rect.right))
-    {
-        return 8;//bot right
-    }
-    else
-        return 0;
-
 }
 
 function imageLoad(){
@@ -139,16 +112,9 @@ function imageLoad(){
             var canvas = document.getElementById("canvas-bg")
             canvas.width = img.width;
             canvas.height = img.height;
-            var div = document.createElement("div");
-            div.setAttribute("style","border-style:dashed; border-color:blue; border-width:thick;");
-            div.setAttribute("style", "width:"+canvas.width+"; height:"+canvas.height);
-            toWrap = canvas;
-            wrapper = div;
-            var wrap = function (toWrap, wrapper) {
-                wrapper = wrapper || document.createElement('div');
-                toWrap.parentNode.appendChild(wrapper);
-                return wrapper.appendChild(toWrap);
-            };
+            canvas.style.borderStyle = "dashed";
+            canvas.style.borderColor = "blue";
+            canvas.style.borderWidth = "7px";
             var imgX = 0;
             var imgY = 0;
             var ctx = canvas.getContext("2d");
