@@ -179,32 +179,9 @@ function imageLoad(){
 
         function generateOverlay(ctx,startX,startY,height,width)
         {
-            ctx.save();
-            ctx.setLineDash([15,15]);
-            ctx.beginPath();
-            ctx.lineWidth=5;
-            ctx.strokeStyle = 'blue';
-            ctx.moveTo(startX,startY);
-            ctx.lineTo(startX,startY);
-            ctx.lineTo(startX, height);
-            ctx.lineTo(width,height);
-            ctx.lineTo(width,startY);
-            ctx.lineTo(startX,startY);
-            ctx.stroke();
-
-            ctx.restore();
-            ctx.beginPath();
-            ctx.fillStyle = 'blue';
-            ctx.fillRect(startX,startY+height/2,10,10); //mid left
-            ctx.fillRect(startX+width/2,startY,10,10); //topmid
-            ctx.fillRect(startX+width/2,height-10,10,10);//botmid
-            ctx.fillRect(width-10,startY+height/2,10,10);//midright
-
-            ctx.fillRect(startX,startY,10,10); //topleft
-            ctx.fillRect(startX, height-10,10,10); //botleft
-            ctx.fillRect(width-10,height-10,10,10); //botright
-            ctx.fillRect(width-10,startY,10,10); //topright
-            ctx.stroke();
+            var div = document.createElement("div");
+            div.setAttribute("style", "border-style:dotted; border-color:blue;");
+            document.body.appendChild(div);
 
             addButton(button);
 
@@ -223,4 +200,3 @@ function imageLoad(){
             imageDrawn = true;
         }
     }
-</script>
