@@ -5,7 +5,6 @@
 <meta charset="UTF-8"></meta>
 <script>
 var stop = false;
-var stateValues;
 var imageDrawn = false;
 var button = false;
 document.addEventListener('DOMContentLoaded',function(){
@@ -31,28 +30,41 @@ function handleMouseEvent(event)
 {
   if(stop==false && imageDrawn==true) //add if image has been drawn
   {
-      //console.log(event.type);
-      //console.log(event.clientX,event.clientY);
-      editImage(event,stateValues);
+      editImage(event);
   }
 }
 
-function editImage(event, stateValues)
+function editImage(event)
 {
     var mousePosition;
-var offset = [0,0];
-var div;
-var isDown = false;
-    //var canvas = document.getElementById("canvas-bg");
+    var offset = [0,0];
+    var div;
+    var isDown = false;
+    var canvas = document.getElementById("canvas-bg");
     document.body.addEventListener('mousedown',mouseDown);
     function mouseDown(e){
-        if(isInImage(e.clientX,e.clientY,stateValues))
+        if(isInImage(e.clientX,e.clientY))
         {
-            console.log("within");
+            console.log("within2");
             isDown = true;
-            //console.log(offset);
+            offset = [canvas.offsetLeft - e.clientX,canvas.offsetTop - e.clientY];
         }
     }
+    document.addEventListener('mouseup', function() {isDown = false;}, true);
+
+    document.addEventListener('mousemove', function(event) {
+    event.preventDefault();
+    if (isDown) {
+        mousePosition = {
+
+            x : event.clientX,
+            y : event.clientY
+
+        };
+        canvas.style.left = (mousePosition.x + offset[0]) + 'px';
+        canvas.style.top  = (mousePosition.y + offset[1]) + 'px';
+    }
+}, true);
 }
 
 function isInImage(X,Y)
