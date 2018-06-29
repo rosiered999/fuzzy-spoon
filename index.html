@@ -30,7 +30,8 @@ function handleMouseEvent(event)
 {
   if(stop==false && imageDrawn==true) //add if image has been drawn
   {
-      editImage(event);
+     // setTimeout(editImage(event),500);
+     editImage(event);
   }
 }
 
@@ -40,31 +41,56 @@ function editImage(event)
     var offset = [0,0];
     var div;
     var isDown = false;
+    var resize;
     var canvas = document.getElementById("canvas-bg");
+    var rect = canvas.getBoundingClientRect();
+    var rect2 = rect;
+    //document.body.addEventListener("mousemove",isInResizers);
+    //document.body.addEventListener("mousedown",);
     document.body.addEventListener('mousedown',mouseDown);
+    document.addEventListener('mouseup', function() {resize=0;});
     function mouseDown(e){
         if(isInImage(e.clientX,e.clientY))
         {
-            console.log("within2");
+            resize = isInResizers(e.clientX,e.clientY);
+            console.log("resize",resize);
             isDown = true;
             offset = [canvas.offsetLeft - e.clientX,canvas.offsetTop - e.clientY];
+            document.addEventListener('mouseup', function() {isDown = false;}, true);
+            document.addEventListener('mousemove', function(event) {
+                event.preventDefault();
+                if (isDown && !resize) {
+                    mousePosition = {
+
+                        x : event.clientX,
+                        y : event.clientY
+
+                    };
+                    canvas.style.left = (mousePosition.x + offset[0]) + 'px';
+                    canvas.style.top  = (mousePosition.y + offset[1]) + 'px';
+                }
+                else if(isDown) {
+                    var prevTop,prevLeft,prevWidth,prevHeight;
+                    var ctx = canvas.getContext("2d");
+                    var canvasCopy = document.createElement("canvas")
+                    var copyContext = canvasCopy.getContext("2d")
+                    var img = new Image();
+                    img.src = canvas.toDataURL();
+                    var rect = canvas.getBoundingClientRect();
+                    var X = (event.clientX - rect.left) / (document.getElementById("canvas-bg").clientWidth / document.getElementById("canvas-bg").width);
+                    var Y = (event.clientY - rect.top) / (document.getElementById("canvas-bg").clientHeight / document.getElementById("canvas-bg").height);
+                    X = Math.ceil(X);
+                    Y = Math.ceil(Y);
+                    console.log(X,Y);
+                    canvasCopy.width = X;
+                    canvasCopy.height = Y;
+                    img.width = X;
+                    img.height = Y;
+                    copyContext.drawImage(img, 0,0,X,Y);
+                }
+            }, true);
         }
-    }
-    document.addEventListener('mouseup', function() {isDown = false;}, true);
-
-    document.addEventListener('mousemove', function(event) {
-    event.preventDefault();
-    if (isDown) {
-        mousePosition = {
-
-            x : event.clientX,
-            y : event.clientY
-
-        };
-        canvas.style.left = (mousePosition.x + offset[0]) + 'px';
-        canvas.style.top  = (mousePosition.y + offset[1]) + 'px';
-    }
-}, true);
+    };
 }
 
 function isInImage(X,Y)
@@ -75,6 +101,49 @@ function isInImage(X,Y)
     {
         return true;
     }
+}
+
+function isInResizers(X,Y)
+{
+    var canvas = document.getElementById("canvas-bg");
+    var rect = canvas.getBoundingClientRect();
+    var blurArea =20;
+    var resize;
+    if(X>rect.left && Y>rect.top && Y<(rect.top+blurArea) && X<(rect.left+blurArea))
+    {
+        return 1; //top left
+    }
+    else if(X>rect.left+rect.width/2-blurArea/2 && Y>rect.top && Y<(rect.top+blurArea) && X<(rect.left+rect.width/2+blurArea/2))
+    {
+        return 2;//top mid
+    }
+    else if(X>rect.right-blurArea && Y>rect.top && Y<(rect.top+blurArea) && X<(rect.right))
+    {
+        return 3;//top right
+    }
+    else if(X>rect.left && Y>rect.top+rect.height/2-blurArea/2 && Y<(rect.top+rect.height/2+blurArea/2) && X<(rect.left+blurArea))
+    {
+        return 4;//mid left
+    }
+    else if(X>rect.right-blurArea && Y>rect.top+rect.height/2-blurArea/2 && Y<(rect.top+rect.height/2+blurArea/2) && X<(rect.right))
+    {
+        return 5;//mid right
+    }
+    else if(X>rect.left && Y>rect.bottom-blurArea && Y<(rect.bottom) && X<(rect.left+blurArea))
+    {
+        return 6;//bot left
+    }
+    else if(X>rect.left+rect.width/2-blurArea/2 && Y>rect.bottom-blurArea && Y<(rect.bottom) && X<(rect.left+rect.width/2+blurArea/2))
+    {
+        return 7;//bot mid
+    }
+    else if(X>rect.right-blurArea && Y>rect.bottom-blurArea && Y<(rect.bottom) && X<(rect.right))
+    {
+        return 8;//bot right
+    }
+    else
+        return 0;
+
 }
 
 function imageLoad(){
