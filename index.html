@@ -7,16 +7,16 @@
 var stop = false;
 var imageDrawn = false;
 var button = false;
-document.addEventListener('DOMContentLoaded',function(){
-    inp = document.getElementById('imgfile');
+document.addEventListener("DOMContentLoaded",function(){
+    inp = document.getElementById("imgfile");
     //console.log(inp);
     inp.addEventListener("change", imageLoad);
 
     var canvasFG = document.getElementById("canvas-fg");
     var ctx = canvasFG.getContext("2d");
     ctx.save();
-    ctx.globalAlpha = 0.5
-    ctx.fillRect(0,0,500,500)
+    ctx.globalAlpha = 0.5;
+    ctx.fillRect(0,0,500,500);
     ctx.clearRect(25,25,100,50);
     ctx.stroke();
     ctx.restore();
@@ -38,8 +38,11 @@ function handleMouseEvent(event)
 function editImage(event)
 {
     var mousePosition;
+    var mouseUpPos;
+    var mouseDownPos;
     var offset = [0,0];
     var div;
+    var x = 0.5;
     var isDown = false;
     var resize;
     var canvas = document.getElementById("canvas-bg");
@@ -47,16 +50,21 @@ function editImage(event)
     var rect2 = rect;
     //document.body.addEventListener("mousemove",isInResizers);
     //document.body.addEventListener("mousedown",);
-    document.body.addEventListener('mousedown',mouseDown);
-    document.addEventListener('mouseup', function() {resize=0;});
+    document.body.addEventListener("mousedown",mouseDown);
+    document.addEventListener("mouseup", function() {resize=0;});
     function mouseDown(e){
         if(isInImage(e.clientX,e.clientY))
         {
+            var canvas = document.getElementById("canvas-bg");
             resize = isInResizers(e.clientX,e.clientY);
             console.log("resize",resize);
             isDown = true;
             offset = [canvas.offsetLeft - e.clientX,canvas.offsetTop - e.clientY];
-            document.addEventListener('mouseup', function() {isDown = false;}, true);
+            document.addEventListener('mouseup', function(event) {isDown = false;
+            mouseUpPos ={
+                x: event.clientX,
+                y: event.clientY
+            };}, true);
             document.addEventListener('mousemove', function(event) {
                 event.preventDefault();
                 if (isDown && !resize) {
@@ -70,60 +78,27 @@ function editImage(event)
                     canvas.style.top  = (mousePosition.y + offset[1]) + 'px';
                 }
                 else if(isDown) {
-                /*    mousePosition = {
+                    var str = "";
+                    findScale()
+                    var canvas = document.getElementById("canvas-bg");
+                    mousePosition = {
 
                         x : event.clientX,
                         y : event.clientY
 
                     };
-                    //find the relative scale
-                    if(resize==2 || resize==7)
-                    {//just y
-                        var prev = (canvas.style.left);
-                        canvas.style.left += (mousePosition.x + offset[0]) + 'px';
-                        canvas.style.top  += (mousePosition.y + offset[1]) + 'px';
-                        console.log(canvas.style.left);
-                        scale = canvas.style.left/prev;
-                    }
-                    else if(resize==4 || resize==5)
-                    {//just x
-
-                    }
-*/
-                    //animateScale()
-
-                    /*function animateScale()
+                    if(resize==7 )
                     {
-                        var scale=0.5;
-                        var canvas=document.getElementById("canvas-bg");
-                        var ctx=canvas.getContext("2d");
-                        var cw=canvas.width;
-                        var ch=canvas.height;
-                        var tempCanvas=document.createElement("canvas");
-                        var tctx=tempCanvas.getContext("2d");
+                        str += "scale(" + x +","+x+")";
+                        canvas.style.transform = str;
+                        x = x*1.05;
+                        str = "";
+                    }
 
-                        var img=new Image();
-                        img.onload=start;
-                        img.src=canvas.toDataURL();
-                        function start(){
-                          canvas.width=img.width;
-                          canvas.height=img.height;
-                          ctx.drawImage(img,0,0);
-                          resizeTo(canvas,scale);
-                        }
+                    function findScale()
+                    {
 
-                        function resizeTo(canvas,pct){
-                          var cw=canvas.width;
-                          var ch=canvas.height;
-                          tempCanvas.width=cw;
-                          tempCanvas.height=ch;
-                          tctx.drawImage(canvas,0,0);
-                          canvas.width*=pct;
-                          canvas.height*=pct;
-                          var ctx=canvas.getContext('2d');
-                          ctx.drawImage(tempCanvas,0,0,cw,ch,0,0,cw*pct,ch*pct);
-                        }
-                    }*/
+                    }
                 }
             }, true);
         }
