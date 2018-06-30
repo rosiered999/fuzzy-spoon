@@ -6,11 +6,13 @@
 <script>
 var stop = false;
 var imageDrawn = false;
+var onBorder = false;
 var button = false;
+var x = 1;
+
 document.addEventListener('DOMContentLoaded',function(){
     inp = document.getElementById('imgfile');
     inp.addEventListener("change", imageLoad);
-
     var canvasFG = document.getElementById("canvas-fg");
     var ctx = canvasFG.getContext("2d");
     ctx.save();
@@ -29,29 +31,31 @@ function handleMouseEvent(event)
 {
   if(stop==false && imageDrawn==true) //add if image has been drawn
   {
-     editImage(event);
+     window.requestAnimationFrame(editImage);
   }
 }
 
 function editImage(event)
 {
+    var str;
     var mousePosition;
     var offset = [0,0];
+
     var div;
     var isDown = false;
-    var onBorder = false;
     var canvas = document.getElementById("canvas-bg");
     document.body.addEventListener('mousedown',mouseDown);
+    document.body.addEventListener('mousemove',isOnBorder);
     function mouseDown(e){
         if(isInImage(e.clientX,e.clientY))
         {
             isDown = true;
             offset = [canvas.offsetLeft - e.clientX,canvas.offsetTop - e.clientY];
-            document.addEventListener('mouseup', function() {isDown = false;}, true);
+            document.addEventListener('mouseup', function() {isDown = false; onBorder=false;}, true);
             document.addEventListener('mousemove', function(event) {
+                var canvas = document.getElementById("canvas-bg");
                 event.preventDefault();
-                var onBorder = isOnBorder(e.clientX,e.clientY);
-                if (isDown && !isOnBorder) {
+                if (isDown && !onBorder) {
                     mousePosition = {
 
                         x : event.clientX,
@@ -61,37 +65,69 @@ function editImage(event)
                     canvas.style.left = (mousePosition.x + offset[0]) + 'px';
                     canvas.style.top  = (mousePosition.y + offset[1]) + 'px';
                 }
-                else if(isDown && isOnBorder)
+                else if(isDown && onBorder)
                 {
-                    console.log("BORDER");
+                    //console.log("BORDER");
+                    scale_factor = direction(event);
+                    str += "scale(" + x +","+x+")";
+                    var canvas = document.getElementById("canvas-bg");
+                    var rect = canvas.getBoundingClientRect();
+                    canvas.style.transform = str;
+                    //console.log(rect.right-rect.left, rect.bottom-rect.top);
+                    if(rect.right-rect.left<300 || rect.bottom-rect.top<300)
+                        scale_factor=1.0005;
+                    else if(rect.right-rect.left>800 || rect.bottom-rect.top>800)
+                        scale_factor=0.9995;
+                    x = x*scale_factor;
+                    str = "";
                 }
             }, true);
         }
     };
 }
 
+function direction(event)
+{
+        var canvas = document.getElementById("canvas-bg");
+        var rect = canvas.getBoundingClientRect();
+        var xShift = event.movementX;
+        var yShift = event.movementY;
+        var scale_val = [0.9995,1.0005];
+        //console.log(xShift,yShift);
+        if(xShift<0 || yShift<0)
+            return scale_val[1];
+        else
+            return scale_val[0];
+}
+
 function isInImage(X,Y)
 {
     var canvas = document.getElementById("canvas-bg");
     var rect = canvas.getBoundingClientRect();
-    var bord = getComputedStyle(canvas,null).getPropertyValue('border-left-width');//without jquery.
-    //console.log(X,Y);
-    //console.log(bord);
-    if(X>rect.left+bord && Y>rect.top+bord && Y<rect.bottom-bord && X<rect.right-bord)
+    if(X>rect.left && Y>rect.top && Y<rect.bottom && X<rect.right)
     {
-        console.log("within");
         return true;
     }
 }
 
-function isOnBorder(X,Y)
+function isOnBorder(event)
 {
+    var X = event.clientX;
+    var Y = event.clientY;
     var canvas = document.getElementById("canvas-bg");
     var rect = canvas.getBoundingClientRect();
-    if(X>rect.left && Y>rect.top && Y<rect.bottom && X<rect.right && X<rect.left-7 && Y<rect.top-7 && Y>rect.bottom-7 && X<rect.right-7)
+    var bord = getComputedStyle(canvas,null).getPropertyValue('border-left-width');//without jquery.
+    var next = bord.slice(0,bord.length-2);
+    var blur = 5/x;
+    //console.log("x in border fn", x);
+    var fin = parseInt(next)+blur;
+    bord = fin;
+    if(((rect.left <X && X<rect.left+bord)||(rect.right-bord<X && X<rect.right))||((rect.top<Y && Y<rect.top+bord)||(rect.bottom-bord<Y && Y<rect.bottom)))
     {
+        onBorder = true;
         return true;
     }
+    return false;
 }
 
 function imageLoad(){
@@ -145,11 +181,12 @@ function imageLoad(){
 </head>
 <body>
   <input type='file' id='imgfile' autofocus/>
+  <input type="range">
   <p> </p>
     <br></br>
     <canvas id="canvas-fg" style="position:absolute; z-index:1; width:100%; height:100%;">
     </canvas>
-    <div>
+    <div id="canvasDiv" style="display:inline-block;">
     <canvas id="canvas-bg" style="position:absolute; z-index:0;"></canvas>
 </div>
     <br></br>
