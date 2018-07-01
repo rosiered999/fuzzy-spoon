@@ -46,7 +46,7 @@ function editImage(event)
     var canvas = document.getElementById("canvas-bg");
     document.body.addEventListener('mousedown',mouseDown);
     document.body.addEventListener('mousemove',isOnBorder);
-//    var gray = document.getElementById("grayscale");
+    var gray = document.getElementById("grayscale");
 /*    gray.addEventListener("input",function() =
     {
         var canvas = document.getElementById('canvas');
@@ -167,7 +167,6 @@ function imageLoad(){
         function generateOverlay(ctx,startX,startY,height,width)
         {
             addButton(button);
-            button.addEventListener("click", crop);
             function addButton()
             {
                 if(button==false)
@@ -183,10 +182,6 @@ function imageLoad(){
             imageDrawn = true;
         }
     }
-    function crop()
-    {
-
-    }
 </script>
 </head>
 <body>
@@ -195,7 +190,7 @@ function imageLoad(){
 <!--Can edit for any filter-->
   <p> </p>
     <br></br>
-    <canvas id="canvas-fg" style="position:fixed; z-index:1; width:100%; height:100%;"> <!--1000px; height:1000px-->
+    <canvas id="canvas-fg" style="position:absolute; z-index:1; width:100%; height:100%;">
     </canvas>
     <div id="canvasDiv" style="display:inline-block;">
     <canvas id="canvas-bg" style="position:absolute; z-index:0;"></canvas>
